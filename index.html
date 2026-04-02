@@ -48,8 +48,15 @@
             font-size: 1.8rem;
             letter-spacing: 8px;
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
             padding: 0 20px;
+        }
+
+        #start-subtitle {
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            opacity: 0.4;
+            margin-bottom: 40px;
         }
 
         .start-btn {
@@ -65,6 +72,30 @@
         }
         .start-btn:hover { background: #fff; color: #000; }
 
+        /* ── 語言選擇 ── */
+        .lang-switcher {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        .lang-btn {
+            padding: 8px 20px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: transparent;
+            color: #fff;
+            font-size: 12px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 20px;
+        }
+        .lang-btn:hover { border-color: #fff; }
+        .lang-btn.active {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+
         /* ── 遊戲主介面 ── */
         #app {
             display: none;
@@ -77,13 +108,35 @@
             z-index: 10;
         }
 
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .top-bar-info {
+            font-size: 10px;
+            opacity: 0.5;
+            letter-spacing: 2px;
+        }
+        .lang-toggle {
+            font-size: 10px;
+            opacity: 0.5;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        .lang-toggle:hover { opacity: 1; border-color: #fff; }
+
         .rage-bar-bg { height: 4px; background: rgba(255,255,255,0.1); margin: 20px 0; border-radius: 2px; }
         #rage-fill { height: 100%; width: 0%; background: var(--danger); box-shadow: 0 0 15px var(--danger); transition: width 0.4s; border-radius: 2px; }
 
-        /* ── 計時條 ── */
         .timer-line { width: 100%; height: 2px; background: var(--accent); transition: width 0.1s linear; }
 
-        /* ── 倒數數字 ── */
         #timer-text {
             font-family: 'Syncopate', sans-serif;
             font-size: 12px;
@@ -92,10 +145,7 @@
             margin-top: 8px;
             text-align: right;
         }
-        #timer-text.urgent {
-            color: var(--danger);
-            opacity: 1;
-        }
+        #timer-text.urgent { color: var(--danger); opacity: 1; }
 
         #scenario { font-size: 1.8rem; font-weight: 700; margin: 30px 0; min-height: 140px; line-height: 1.4; }
         .options-grid { display: grid; gap: 12px; margin-top: auto; padding-bottom: 20px; }
@@ -110,6 +160,23 @@
             transition: transform 0.1s;
         }
         .option-btn:active { background: rgba(255,255,255,0.1); border-color: var(--accent) !important; transform: scale(0.97); }
+
+        /* ── 雙語樣式 ── */
+        .dual-text .dual-secondary {
+            display: block;
+            font-size: 0.65em;
+            opacity: 0.45;
+            margin-top: 6px;
+            font-weight: 300;
+            line-height: 1.4;
+        }
+        .option-btn .dual-secondary {
+            font-size: 0.8em;
+            opacity: 0.4;
+            margin-top: 4px;
+            display: block;
+            font-weight: 300;
+        }
 
         /* ── 結果與結算畫面 ── */
         .overlay {
@@ -134,6 +201,15 @@
             align-items: center;
         }
 
+        /* ── 結算雙語 ── */
+        .result-dual {
+            font-size: 0.75em;
+            opacity: 0.45;
+            margin-top: 6px;
+            font-weight: 300;
+            line-height: 1.4;
+        }
+
         /* ── 動效 ── */
         .critical-shake { animation: shake 0.2s infinite; color: var(--danger); }
         @keyframes shake { 0%{transform:translate(1px,1px)} 50%{transform:translate(-1px,-2px)} 100%{transform:translate(1px,1px)} }
@@ -143,11 +219,20 @@
 
     <div id="start-screen">
         <h1 id="glitch-title">今晚唔想瞓梳化</h1>
+        <p id="start-subtitle">SOFA SURVIVAL</p>
+        <div class="lang-switcher">
+            <button class="lang-btn active" onclick="setLang('zh')">中文</button>
+            <button class="lang-btn" onclick="setLang('dual')">雙語</button>
+            <button class="lang-btn" onclick="setLang('en')">ENG</button>
+        </div>
         <button class="start-btn" onclick="initiateGame()">START MISSION</button>
     </div>
 
     <div id="app">
-        <div style="font-size: 10px; opacity: 0.5; letter-spacing: 2px;">SURVIVAL STAGE <span id="step-num">1</span>/10</div>
+        <div class="top-bar">
+            <div class="top-bar-info">SURVIVAL STAGE <span id="step-num">1</span>/10</div>
+            <button class="lang-toggle" onclick="toggleLang()" id="lang-toggle-btn">雙語</button>
+        </div>
         <div class="rage-bar-bg"><div id="rage-fill"></div></div>
         <div class="timer-line" id="timer-bar"></div>
         <div id="timer-text">15s</div>
@@ -167,6 +252,107 @@
 
     <script src="questions.js"></script>
     <script>
+
+    // ═══════════════════════════════════════════════════════
+    // 語言系統（支援 zh / en / dual）
+    // ═══════════════════════════════════════════════════════
+    let currentLang = 'zh';
+
+    // 取得 HTML 文字（支援雙語顯示）
+    function t(field) {
+        if (typeof field === 'string') return field;
+        if (typeof field === 'object' && field !== null) {
+            if (currentLang === 'dual') {
+                const zh = field.zh || '';
+                const en = field.en || '';
+                if (!en) return zh;
+                return `${zh}<span class="dual-secondary">${en}</span>`;
+            }
+            return field[currentLang] || field.zh || '';
+        }
+        return '';
+    }
+
+    // 純文字版（用於 popup 描述）
+    function tPlain(field) {
+        if (typeof field === 'string') return field;
+        if (typeof field === 'object' && field !== null) {
+            if (currentLang === 'dual') {
+                const zh = field.zh || '';
+                const en = field.en || '';
+                if (!en) return zh;
+                return `${zh}\n${en}`;
+            }
+            return field[currentLang] || field.zh || '';
+        }
+        return '';
+    }
+
+    // 取得選項陣列（含 HTML）
+    function tOptions(field) {
+        if (Array.isArray(field)) return field.map(f => ({ text: f, html: f }));
+        if (typeof field === 'object' && field !== null) {
+            const zhArr = field.zh || [];
+            const enArr = field.en || [];
+            if (currentLang === 'dual') {
+                return zhArr.map((zh, i) => {
+                    const en = enArr[i] || '';
+                    return {
+                        text: zh,
+                        html: en ? `${zh}<span class="dual-secondary">${en}</span>` : zh
+                    };
+                });
+            }
+            const arr = field[currentLang] || zhArr;
+            return arr.map(f => ({ text: f, html: f }));
+        }
+        return [];
+    }
+
+    // 首頁語言選擇
+    function setLang(lang) {
+        currentLang = lang;
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            const map = { '中文': 'zh', '雙語': 'dual', 'ENG': 'en' };
+            btn.classList.toggle('active', map[btn.textContent.trim()] === lang);
+        });
+        updateLangToggle();
+    }
+
+    // 遊戲中循環切換
+    function toggleLang() {
+        const cycle = ['zh', 'dual', 'en'];
+        const idx = cycle.indexOf(currentLang);
+        currentLang = cycle[(idx + 1) % cycle.length];
+        updateLangToggle();
+        if (currentIdx < sessionQuestions.length) {
+            refreshCurrentQuestion();
+        }
+    }
+
+    function updateLangToggle() {
+        const labels = { zh: '雙語', dual: 'EN', en: '中文' };
+        document.getElementById('lang-toggle-btn').textContent = labels[currentLang] || '雙語';
+    }
+
+    // 即時更新當前題目（不重置 timer）
+    function refreshCurrentQuestion() {
+        const q = sessionQuestions[currentIdx];
+        document.getElementById('scenario').innerHTML = t(q.s);
+
+        if (currentLang === 'dual') {
+            document.getElementById('scenario').classList.add('dual-text');
+        } else {
+            document.getElementById('scenario').classList.remove('dual-text');
+        }
+
+        const grid = document.getElementById('options');
+        const opts = tOptions(q.o);
+        const buttons = grid.querySelectorAll('.option-btn');
+        buttons.forEach((btn, i) => {
+            if (opts[i]) btn.innerHTML = opts[i].html;
+        });
+    }
 
     // ═══════════════════════════════════════════════════════
     // 標題 Glitch 動效
@@ -206,7 +392,7 @@
     const TIMER_SECONDS = 15;
     const TICK_MS       = 100;
     const TOTAL_ROUNDS  = 10;
-    const URGENT_AT     = 5;       // 剩幾秒開始警告
+    const URGENT_AT     = 5;
 
     let currentIdx       = 0;
     let rage             = 0;
@@ -214,6 +400,51 @@
     let timerId          = null;
     let isLocked         = false;
     let sessionQuestions = [];
+
+    // ═══════════════════════════════════════════════════════
+    // UI 文字（根據語言）
+    // ═══════════════════════════════════════════════════════
+    const UI = {
+        survived:     { zh: "SURVIVED",    en: "SURVIVED" },
+        survivedMsg:  { zh: "算你識答，暫時安全。",   en: "Good answer. You're safe... for now." },
+        danger:       { zh: "DANGER",      en: "DANGER" },
+        timeout:      { zh: "諗咁耐？你一定係喺度編緊大話！", en: "Took too long? You must be making up a lie!" },
+        continue:     { zh: "繼續",        en: "CONTINUE" },
+        missionEnd:   { zh: "MISSION END", en: "MISSION END" },
+        survivalRate: { zh: "本次求生成功率：",  en: "Survival rate: " },
+        oneMore:      { zh: "再嚟一次",    en: "ONE MORE TRY" },
+        rank1:        { zh: "【求生大師】\n你女朋友對你非常滿意",
+                        en: "【Survival Master】\nYour girlfriend is very pleased." },
+        rank2:        { zh: "【資深男友】\n基本上可以安睡在床上",
+                        en: "【Veteran Boyfriend】\nYou can probably sleep on the bed tonight." },
+        rank3:        { zh: "【梳化常駐嘉賓】\n今晚注定瞓梳化",
+                        en: "【Sofa Resident】\nThe couch is your bed tonight." }
+    };
+
+    function ui(key) {
+        const item = UI[key];
+        if (!item) return '';
+        if (currentLang === 'dual') {
+            const zh = item.zh || '';
+            const en = item.en || '';
+            if (!en) return zh;
+            return `${zh}\n${en}`;
+        }
+        return item[currentLang] || item.zh || '';
+    }
+
+    // HTML 版本的 ui（用於需要換行的地方）
+    function uiHtml(key) {
+        const item = UI[key];
+        if (!item) return '';
+        if (currentLang === 'dual') {
+            const zh = item.zh || '';
+            const en = item.en || '';
+            if (!en) return zh;
+            return `${zh}<br><span class="result-dual">${en}</span>`;
+        }
+        return item[currentLang] || item.zh || '';
+    }
 
     // ═══════════════════════════════════════════════════════
     // 開始遊戲
@@ -251,16 +482,23 @@
         document.getElementById('scenario').classList.remove('critical-shake');
 
         const q = sessionQuestions[currentIdx];
-        document.getElementById('scenario').innerHTML = q.s;
+        document.getElementById('scenario').innerHTML = t(q.s);
         document.getElementById('step-num').innerText = currentIdx + 1;
+
+        if (currentLang === 'dual') {
+            document.getElementById('scenario').classList.add('dual-text');
+        } else {
+            document.getElementById('scenario').classList.remove('dual-text');
+        }
 
         const grid = document.getElementById('options');
         grid.innerHTML = '';
 
-        q.o.forEach((opt, i) => {
+        const opts = tOptions(q.o);
+        opts.forEach((opt, i) => {
             const btn = document.createElement('div');
             btn.className = 'option-btn';
-            btn.innerText = opt;
+            btn.innerHTML = opt.html;
             btn.onclick = () => {
                 if (isLocked) return;
                 isLocked = true;
@@ -283,7 +521,6 @@
         const timerText = document.getElementById('timer-text');
         const scenario  = document.getElementById('scenario');
 
-        // 重置顯示
         timerBar.style.width = '100%';
         timerText.innerText  = TIMER_SECONDS + 's';
         timerText.classList.remove('urgent');
@@ -295,15 +532,12 @@
             remaining -= TICK_MS;
             if (remaining < 0) remaining = 0;
 
-            // 更新進度條
             const pct = (remaining / totalMs) * 100;
             timerBar.style.width = pct + '%';
 
-            // 更新秒數文字
             const secs = Math.ceil(remaining / 1000);
             timerText.innerText = secs + 's';
 
-            // 緊急狀態
             if (secs <= URGENT_AT) {
                 timerText.classList.add('urgent');
                 timerBar.style.background = 'var(--danger)';
@@ -314,11 +548,10 @@
                 scenario.classList.remove('critical-shake');
             }
 
-            // 時間到
             if (remaining <= 0) {
                 clearInterval(timerId);
                 isLocked = true;
-                handleFail("諗咁耐？你一定係喺度編緊大話！");
+                handleFail(ui('timeout'));
             }
         }, TICK_MS);
     }
@@ -326,20 +559,20 @@
     // ═══════════════════════════════════════════════════════
     // 答題邏輯
     // ═══════════════════════════════════════════════════════
-    function selectAnswer(idx, correct, failMsg) {
+    function selectAnswer(idx, correct, failField) {
         clearInterval(timerId);
         if (idx === correct) {
             score++;
-            showPopup("SURVIVED", "算你識答，暫時安全。", false);
+            showPopup(ui('survived'), ui('survivedMsg'), false);
         } else {
-            handleFail(failMsg);
+            handleFail(tPlain(failField));
         }
     }
 
     function handleFail(msg) {
         rage = Math.min(rage + 10, 100);
         document.getElementById('rage-fill').style.width = rage + "%";
-        showPopup("DANGER", msg, true);
+        showPopup(ui('danger'), msg, true);
     }
 
     // ═══════════════════════════════════════════════════════
@@ -349,11 +582,11 @@
         const over    = document.getElementById('overlay');
         const titleEl = document.getElementById('status-title');
 
-        titleEl.innerText  = title;
+        titleEl.innerText   = title;
         titleEl.style.color = isFail ? '#ff0055' : '#00f2ff';
         document.getElementById('status-desc').innerText  = desc;
-        document.getElementById('rank-display').innerText = '';
-        document.getElementById('action-btn').innerText   = 'CONTINUE';
+        document.getElementById('rank-display').innerHTML = '';
+        document.getElementById('action-btn').innerText   = ui('continue');
         document.getElementById('action-btn').onclick     = nextLevel;
         over.style.display = 'flex';
     }
@@ -371,17 +604,17 @@
         clearInterval(timerId);
 
         const pct  = Math.round((score / sessionQuestions.length) * 100);
-        const rank = score >= 9  ? "【求生大師】你女朋友對你非常滿意"
-                   : score >= 6  ? "【資深男友】基本上可以安睡在床上"
-                                 : "【梳化常駐嘉賓】今晚注定瞓梳化";
+        const rank = score >= 9  ? uiHtml('rank1')
+                   : score >= 6  ? uiHtml('rank2')
+                                 : uiHtml('rank3');
 
-        document.getElementById('status-title').innerText     = "MISSION END";
-        document.getElementById('status-title').style.color   = '#fff';
-        document.getElementById('status-desc').innerText      = "本次求生成功率：" + pct + "%";
-        document.getElementById('rank-display').innerText     = rank;
-        document.getElementById('action-btn').innerText       = "ONE MORE TRY";
-        document.getElementById('action-btn').onclick         = () => location.reload();
-        document.getElementById('overlay').style.display      = 'flex';
+        document.getElementById('status-title').innerText   = ui('missionEnd');
+        document.getElementById('status-title').style.color = '#fff';
+        document.getElementById('status-desc').innerText    = ui('survivalRate') + pct + "%";
+        document.getElementById('rank-display').innerHTML   = rank;
+        document.getElementById('action-btn').innerText     = ui('oneMore');
+        document.getElementById('action-btn').onclick       = () => location.reload();
+        document.getElementById('overlay').style.display    = 'flex';
     }
 
     </script>
