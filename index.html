@@ -12,24 +12,30 @@
             --bg: #000;
             --accent: #00f2ff;
             --danger: #ff0055;
-            --glass: rgba(255, 255, 255, 0.03);
+            --glass: rgba(255, 255, 255, 0.05);
         }
 
+        /* 1. 基礎鎖死與置中環境 */
         body, html {
-            margin: 0; padding: 0;
-            width: 100%; height: 100dvh;
-            background: var(--bg);
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100dvh;
+            background-color: var(--bg);
             color: #fff;
             font-family: 'Noto Sans TC', sans-serif;
             overflow: hidden;
-            position: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* 啟動首頁：解構動畫區 */
+        /* 2. 啟動首頁 */
         #start-screen {
             position: fixed;
+            top: 0; left: 0;
             z-index: 1000;
-            width: 100%; height: 100%;
+            width: 100vw; height: 100dvh;
             background: #000;
             display: flex;
             flex-direction: column;
@@ -40,10 +46,11 @@
 
         #glitch-title {
             font-family: 'Syncopate', sans-serif;
-            font-size: 2rem;
-            letter-spacing: 10px;
+            font-size: 1.8rem;
+            letter-spacing: 8px;
             text-align: center;
             margin-bottom: 40px;
+            padding: 0 20px;
         }
 
         .start-btn {
@@ -54,116 +61,79 @@
             letter-spacing: 5px;
             cursor: pointer;
             transition: all 0.3s;
+            font-family: 'Syncopate', sans-serif;
+            font-size: 0.8rem;
         }
 
         .start-btn:hover { background: #fff; color: #000; }
 
-        /* 遊戲主介面 */
+        /* 3. 遊戲主介面 - 確保內容居中且寬度自適應 */
         #app {
-            display: none; /* 初始隱藏 */
-            padding: calc(env(safe-area-inset-top) + 20px) 25px calc(env(safe-area-inset-bottom) + 20px);
+            display: none;
+            width: 100%;
+            max-width: 450px;
             height: 100%;
+            padding: calc(env(safe-area-inset-top) + 20px) 25px calc(env(safe-area-inset-bottom) + 20px);
             box-sizing: border-box;
             flex-direction: column;
+            z-index: 10;
         }
 
         .rage-bar-bg { height: 4px; background: rgba(255,255,255,0.1); margin: 20px 0; border-radius: 2px; }
         #rage-fill { height: 100%; width: 0%; background: var(--danger); box-shadow: 0 0 15px var(--danger); transition: width 0.4s; }
+        .timer-line { width: 100%; height: 2px; background: var(--accent); transition: width 0.1s linear; }
 
-        #scenario { font-size: 1.8rem; font-weight: 700; margin: 40px 0; min-height: 120px; }
-        .options-grid { display: grid; gap: 12px; margin-top: auto; }
+        #scenario { font-size: 1.8rem; font-weight: 700; margin: 40px 0; min-height: 140px; line-height: 1.4; }
+        .options-grid { display: grid; gap: 12px; margin-top: auto; padding-bottom: 20px; }
+        
         .option-btn {
             background: var(--glass);
             border: 1px solid rgba(255,255,255,0.1) !important;
-            padding: 20px; border-radius: 8px; font-size: 15px; cursor: pointer;
-            outline: none !important; -webkit-tap-highlight-color: transparent;
+            padding: 20px; border-radius: 12px; font-size: 16px; color: #fff;
+            cursor: pointer; text-align: left;
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.1s;
         }
         .option-btn:active { background: rgba(255,255,255,0.1); border-color: var(--accent) !important; transform: scale(0.97); }
 
-        .timer-line { width: 100%; height: 2px; background: var(--accent); transition: width 0.1s linear; }
-
-        /* 結果展示 */
+        /* 4. 結果與結算畫面 - 絕對物理置中 */
         .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 2000; display: none;
-            justify-content: center; align-items: center; text-align: center; padding: 40px;
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100vw; height: 100dvh;
+            background: rgba(0,0,0,0.98); 
+            z-index: 9999; 
+            display: none;
+            justify-content: center; 
+            align-items: center; 
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
+        .overlay-inner {
+            width: 90%;
+            max-width: 320px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 動效 */
         .critical-shake { animation: shake 0.2s infinite; color: var(--danger); }
         @keyframes shake { 0%{transform:translate(1px,1px)} 50%{transform:translate(-1px,-2px)} 100%{transform:translate(1px,1px)} }
-        /* 基礎鎖死與黑魂融合 */
-body, html {
-    margin: 0;
-    padding: 0;
-    width: 100vw;
-    height: 100dvh;
-    background-color: #000; /* 與靈動島融合 */
-    color: #fff;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* 遊戲主容器 */
-#app {
-    display: none;
-    width: 100%;
-    max-width: 500px; /* 模擬手機寬度 */
-    height: 100%;
-    flex-direction: column;
-    padding: calc(env(safe-area-inset-top) + 20px) 25px calc(env(safe-area-inset-bottom) + 20px);
-    box-sizing: border-box;
-}
-
-/* 結算與答案覆蓋層 - 強制幾何置中 */
-.overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100dvh;
-    background: rgba(0, 0, 0, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    z-index: 9999;
-    
-    /* 這裡是最關鍵的置中邏輯 */
-    display: none; 
-    flex-direction: column;
-    justify-content: center; /* 垂直置中 */
-    align-items: center;     /* 水平置中 */
-}
-
-/* 確保內部文字容器也置中 */
-.overlay-inner {
-    text-align: center;
-    width: 90%;
-    max-width: 300px;
-}
-
-.option-btn {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    padding: 18px;
-    border-radius: 12px;
-    font-size: 16px;
-    cursor: pointer;
-    outline: none !important; /* 徹底消滅邊框 */
-    -webkit-tap-highlight-color: transparent; /* 消滅點擊藍色區塊 */
-}
-
     </style>
 </head>
 <body>
 
     <div id="start-screen">
-        <h1 id="glitch-title">SOFA SURVIVAL</h1>
+        <h1 id="glitch-title">今晚唔想瞓梳化</h1>
         <button class="start-btn" onclick="initiateGame()">START MISSION</button>
     </div>
 
     <div id="app">
-        <div style="font-size: 10px; opacity: 0.5; letter-spacing: 2px;">STAGE <span id="step-num">1</span>/10</div>
+        <div style="font-size: 10px; opacity: 0.5; letter-spacing: 2px;">SURVIVAL STAGE <span id="step-num">1</span>/10</div>
         <div class="rage-bar-bg"><div id="rage-fill"></div></div>
         <div class="timer-line" id="timer-bar"></div>
         
@@ -171,22 +141,20 @@ body, html {
         <div class="options-grid" id="options"></div>
     </div>
 
-<div id="overlay" class="overlay">
-    <div class="overlay-inner">
-        <h2 id="status-title" style="font-size: 2.5rem; margin-bottom: 10px;">STATUS</h2>
-        <p id="status-desc" style="font-size: 1rem; opacity: 0.7; margin-bottom: 30px;"></p>
-        <div id="rank-display" style="font-size: 1.4rem; color: #00f2ff; margin-bottom: 40px; font-weight: bold;"></div>
-        <button id="action-btn" class="start-btn" onclick="nextLevel()">CONTINUE</button>
+    <div id="overlay" class="overlay">
+        <div class="overlay-inner">
+            <h2 id="status-title" style="font-size: 2.5rem; margin-bottom: 15px; font-family: 'Syncopate';">STATUS</h2>
+            <p id="status-desc" style="font-size: 1.1rem; opacity: 0.8; margin-bottom: 35px; line-height: 1.6;"></p>
+            <div id="rank-display" style="font-size: 1.6rem; color: var(--accent); margin-bottom: 45px; font-weight: bold; letter-spacing: 2px;"></div>
+            <button id="action-btn" class="start-btn" onclick="nextLevel()">CONTINUE</button>
+        </div>
     </div>
-</div>
-
 
     <script src="questions.js"></script>
     <script>
         const titleText = "今晚唔想瞓梳化";
         const glitchTitle = document.getElementById('glitch-title');
         
-        // 1. 解構動畫效果
         function scrambleTitle() {
             let iteration = 0;
             const letters = "ABCDEFGHIJKLMN0123456789%#$@";
@@ -201,7 +169,6 @@ body, html {
         }
         window.onload = scrambleTitle;
 
-        // 2. 遊戲邏輯
         let currentIdx = 0;
         let rage = 0;
         let score = 0;
@@ -217,10 +184,12 @@ body, html {
         }
 
         function loadQuestion() {
-            if (currentIdx >= 10) return finishGame(); // 每次玩10題
+            if (currentIdx >= 10) return finishGame();
             
-            // 從 1000 題中隨機抽取 (假設 questions.js 已加載)
-            const q = allQuestions[Math.floor(Math.random() * allQuestions.length)];
+            // 確保 allQuestions 存在
+            const q = (typeof allQuestions !== 'undefined') ? 
+                      allQuestions[Math.floor(Math.random() * allQuestions.length)] : 
+                      {s:"(請先在questions.js加入題目)", o:["選項A","選項B","選項C","選項D"], a:0, f:"錯誤"};
             
             document.getElementById('scenario').innerHTML = q.s;
             document.getElementById('step-num').innerText = currentIdx + 1;
@@ -232,7 +201,7 @@ body, html {
                 btn.className = 'option-btn';
                 btn.innerText = opt;
                 btn.onclick = () => {
-                    btn.blur(); // 試圖修復邊框問題
+                    btn.blur();
                     selectAnswer(i, q.a, q.f);
                 };
                 grid.appendChild(btn);
@@ -244,12 +213,14 @@ body, html {
             let left = 100;
             clearInterval(timerId);
             timerId = setInterval(() => {
-                left -= 1.5;
+                left -= 1.4;
                 document.getElementById('timer-bar').style.width = left + "%";
                 if(left <= 30) document.getElementById('scenario').classList.add('critical-shake');
+                else document.getElementById('scenario').classList.remove('critical-shake');
+                
                 if(left <= 0) {
                     clearInterval(timerId);
-                    handleFail("諗咁耐？你一定係喺度編緊故事！");
+                    handleFail("諗咁耐？你一定係喺度編緊大話！");
                 }
             }, 100);
         }
@@ -258,7 +229,7 @@ body, html {
             clearInterval(timerId);
             if(idx === correct) {
                 score++;
-                showPopup("SURVIVED", "暫時安全，請繼續保持。", false);
+                showPopup("SURVIVED", "算你識答，暫時安全。", false);
             } else {
                 handleFail(failMsg);
             }
@@ -284,14 +255,14 @@ body, html {
                 currentIdx++;
                 loadQuestion();
             } else {
-                location.reload(); // One More Try
+                location.reload();
             }
         }
 
         function finishGame() {
             let rank = score >= 9 ? "【求生大師】" : score >= 6 ? "【資深男友】" : "【梳化常駐嘉賓】";
-            document.getElementById('status-title').innerText = "結算";
-            document.getElementById('status-desc').innerText = "本次存活率：" + (score*10) + "%";
+            document.getElementById('status-title').innerText = "MISSION END";
+            document.getElementById('status-desc').innerText = "本次求生成功率：" + (score*10) + "%";
             document.getElementById('rank-display').innerText = rank;
             document.getElementById('action-btn').innerText = "ONE MORE TRY";
             document.getElementById('overlay').style.display = 'flex';
