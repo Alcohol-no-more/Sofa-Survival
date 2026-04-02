@@ -91,6 +91,68 @@
 
         .critical-shake { animation: shake 0.2s infinite; color: var(--danger); }
         @keyframes shake { 0%{transform:translate(1px,1px)} 50%{transform:translate(-1px,-2px)} 100%{transform:translate(1px,1px)} }
+        /* 基礎鎖死與黑魂融合 */
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100dvh;
+    background-color: #000; /* 與靈動島融合 */
+    color: #fff;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 遊戲主容器 */
+#app {
+    display: none;
+    width: 100%;
+    max-width: 500px; /* 模擬手機寬度 */
+    height: 100%;
+    flex-direction: column;
+    padding: calc(env(safe-area-inset-top) + 20px) 25px calc(env(safe-area-inset-bottom) + 20px);
+    box-sizing: border-box;
+}
+
+/* 結算與答案覆蓋層 - 強制幾何置中 */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100dvh;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 9999;
+    
+    /* 這裡是最關鍵的置中邏輯 */
+    display: none; 
+    flex-direction: column;
+    justify-content: center; /* 垂直置中 */
+    align-items: center;     /* 水平置中 */
+}
+
+/* 確保內部文字容器也置中 */
+.overlay-inner {
+    text-align: center;
+    width: 90%;
+    max-width: 300px;
+}
+
+.option-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 18px;
+    border-radius: 12px;
+    font-size: 16px;
+    cursor: pointer;
+    outline: none !important; /* 徹底消滅邊框 */
+    -webkit-tap-highlight-color: transparent; /* 消滅點擊藍色區塊 */
+}
+
     </style>
 </head>
 <body>
@@ -109,14 +171,15 @@
         <div class="options-grid" id="options"></div>
     </div>
 
-    <div id="overlay" class="overlay">
-        <div>
-            <h2 id="status-title" style="font-size: 3rem;">STATUS</h2>
-            <p id="status-desc" style="margin-bottom: 30px; opacity: 0.7;"></p>
-            <div id="rank-display" style="color: var(--accent); font-weight: bold; font-size: 1.5rem; margin-bottom: 40px;"></div>
-            <button id="action-btn" class="start-btn" onclick="nextLevel()">CONTINUE</button>
-        </div>
+<div id="overlay" class="overlay">
+    <div class="overlay-inner">
+        <h2 id="status-title" style="font-size: 2.5rem; margin-bottom: 10px;">STATUS</h2>
+        <p id="status-desc" style="font-size: 1rem; opacity: 0.7; margin-bottom: 30px;"></p>
+        <div id="rank-display" style="font-size: 1.4rem; color: #00f2ff; margin-bottom: 40px; font-weight: bold;"></div>
+        <button id="action-btn" class="start-btn" onclick="nextLevel()">CONTINUE</button>
     </div>
+</div>
+
 
     <script src="questions.js"></script>
     <script>
