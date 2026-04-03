@@ -411,14 +411,9 @@
         });
 
         // 修正5：用雙層 rAF 確保瀏覽器已渲染 100% 再開始動畫
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                timerBar.classList.add('animating');
-                startTimer();
-            });
-        });
-    }
-
+        void timerBar.offsetWidth;          // 強制回流，Safari 立即渲染
+timerBar.classList.add('animating'); // 安全加回 transition
+startTimer();                       // 直接啟動
     // ═══════════════════════════════════════════════════════
     // 15 秒計時器（修正版）
     // ═══════════════════════════════════════════════════════
