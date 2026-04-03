@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -97,10 +96,36 @@
         }
 
         .rage-bar-bg { height: 4px; background: rgba(255,255,255,0.1); margin: 20px 0; border-radius: 2px; }
-        #rage-fill { height: 100%; width: 0%; background: var(--danger); box-shadow: 0 0 15px var(--danger); transition: width 0.4s; border-radius: 2px; }
 
-        .timer-line { width: 100%; height: 2px; background: var(--accent); transition: width 0.1s linear; }
+        /* ── 修正4：預設無光暈，有怒氣時才加 ── */
+        #rage-fill {
+            height: 100%;
+            width: 0%;
+            background: #ff0055;
+            box-shadow: none;
+            transition: width 0.4s, box-shadow 0.4s;
+            border-radius: 2px;
+        }
+        #rage-fill.has-rage {
+            box-shadow: 0 0 15px #ff0055;
+        }
 
+        /* ── 計時條 ── */
+        /* 修正1+5：顏色用 class 控制，預設無 transition ── */
+        .timer-line {
+            width: 100%;
+            height: 2px;
+            background: #00f2ff;
+            transition: none;
+        }
+        .timer-line.animating {
+            transition: width 0.1s linear;
+        }
+        .timer-line.urgent {
+            background: #ff0055 !important;
+        }
+
+        /* ── 倒數數字 ── */
         #timer-text {
             font-family: 'Syncopate', sans-serif;
             font-size: 12px;
@@ -108,8 +133,12 @@
             opacity: 0.5;
             margin-top: 8px;
             text-align: right;
+            transition: color 0.2s, opacity 0.2s;
         }
-        #timer-text.urgent { color: var(--danger); opacity: 1; }
+        #timer-text.urgent {
+            color: #ff0055;
+            opacity: 1;
+        }
 
         /* ── 題目區 ── */
         #scenario {
@@ -148,7 +177,6 @@
             transform: scale(0.97);
         }
 
-        /* 選項英文副文字 */
         .option-en {
             display: block;
             font-size: 0.8em;
@@ -214,7 +242,7 @@
         }
 
         /* ── 動效 ── */
-        .critical-shake { animation: shake 0.2s infinite; color: var(--danger); }
+        .critical-shake { animation: shake 0.2s infinite; color: #ff0055; }
         @keyframes shake { 0%{transform:translate(1px,1px)} 50%{transform:translate(-1px,-2px)} 100%{transform:translate(1px,1px)} }
     </style>
 </head>
@@ -298,6 +326,8 @@
     let score            = 0;
     let timerId          = null;
     let isLocked         = false;
+    let isUrgent         = false;   // 修正2：追蹤 urgent 狀態
+    let popupLocked      = false;   // 修正6：防重複點擊
     let sessionQuestions = [];
 
     // ═══════════════════════════════════════════════════════
@@ -316,7 +346,10 @@
         rage       = 0;
         score      = 0;
 
-        document.getElementById('rage-fill').style.width = '0%';
+        const rageFill = document.getElementById('rage-fill');
+        rageFill.style.width = '0%';
+        rageFill.classList.remove('has-rage');
+
         document.getElementById('start-screen').style.opacity = '0';
 
         setTimeout(() => {
@@ -330,19 +363,32 @@
     // 載入題目
     // ═══════════════════════════════════════════════════════
     function loadQuestion() {
+        // 修正7：一開始就清除可能殘留的定時器
+        clearInterval(timerId);
+
         if (currentIdx >= sessionQuestions.length) return finishGame();
 
         isLocked = false;
-        document.getElementById('scenario').classList.remove('critical-shake');
+        isUrgent = false;   // 修正2：每題重置
+
+        const scenario  = document.getElementById('scenario');
+        const timerBar  = document.getElementById('timer-bar');
+        const timerText = document.getElementById('timer-text');
+
+        scenario.classList.remove('critical-shake');
+
+        // 修正5：關閉過渡 → 瞬間重置到 100% → 下一幀再開啟過渡
+        timerBar.classList.remove('animating', 'urgent');
+        timerBar.style.width = '100%';
+        timerText.innerText  = TIMER_SECONDS + 's';
+        timerText.classList.remove('urgent');
 
         const q = sessionQuestions[currentIdx];
 
-        // 題目：中文 + 英文
         document.getElementById('scenario').innerHTML = q.s;
         document.getElementById('scenario-en').innerHTML = q.se || '';
         document.getElementById('step-num').innerText = currentIdx + 1;
 
-        // 選項：中文 + 英文
         const grid = document.getElementById('options');
         grid.innerHTML = '';
 
@@ -364,11 +410,17 @@
             grid.appendChild(btn);
         });
 
-        startTimer();
+        // 修正5：用雙層 rAF 確保瀏覽器已渲染 100% 再開始動畫
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                timerBar.classList.add('animating');
+                startTimer();
+            });
+        });
     }
 
     // ═══════════════════════════════════════════════════════
-    // 15 秒計時器
+    // 15 秒計時器（修正版）
     // ═══════════════════════════════════════════════════════
     function startTimer() {
         let remaining = TIMER_SECONDS * 1000;
@@ -376,13 +428,6 @@
         const timerBar  = document.getElementById('timer-bar');
         const timerText = document.getElementById('timer-text');
         const scenario  = document.getElementById('scenario');
-
-        timerBar.style.width = '100%';
-        timerText.innerText  = TIMER_SECONDS + 's';
-        timerText.classList.remove('urgent');
-        timerBar.style.background = 'var(--accent)';
-
-        clearInterval(timerId);
 
         timerId = setInterval(() => {
             remaining -= TICK_MS;
@@ -394,14 +439,12 @@
             const secs = Math.ceil(remaining / 1000);
             timerText.innerText = secs + 's';
 
-            if (secs <= URGENT_AT) {
+            // 修正2：用毫秒判斷 + 單向切換，永不退出 urgent
+            if (!isUrgent && remaining <= URGENT_AT * 1000) {
+                isUrgent = true;
                 timerText.classList.add('urgent');
-                timerBar.style.background = 'var(--danger)';
+                timerBar.classList.add('urgent');
                 scenario.classList.add('critical-shake');
-            } else {
-                timerText.classList.remove('urgent');
-                timerBar.style.background = 'var(--accent)';
-                scenario.classList.remove('critical-shake');
             }
 
             if (remaining <= 0) {
@@ -433,26 +476,37 @@
         }
     }
 
+    // 修正8：統一在 handleFail 中也清除定時器
     function handleFail(msg, msgEn) {
+        clearInterval(timerId);
         rage = Math.min(rage + 10, 100);
-        document.getElementById('rage-fill').style.width = rage + "%";
+
+        const rageFill = document.getElementById('rage-fill');
+        rageFill.style.width = rage + "%";
+        if (rage > 0) rageFill.classList.add('has-rage');
+
         showPopup("DANGER", msg, msgEn || '', true);
     }
 
     // ═══════════════════════════════════════════════════════
-    // 彈窗（雙語）
+    // 彈窗（修正6：防重複點擊）
     // ═══════════════════════════════════════════════════════
     function showPopup(title, desc, descEn, isFail) {
+        popupLocked = false;
         const over = document.getElementById('overlay');
 
-        document.getElementById('status-title').innerText   = title;
-        document.getElementById('status-title').style.color = isFail ? '#ff0055' : '#00f2ff';
-        document.getElementById('status-desc').innerText    = desc;
-        document.getElementById('status-desc-en').innerText = descEn;
-        document.getElementById('rank-display').innerText   = '';
+        document.getElementById('status-title').innerText    = title;
+        document.getElementById('status-title').style.color  = isFail ? '#ff0055' : '#00f2ff';
+        document.getElementById('status-desc').innerText     = desc;
+        document.getElementById('status-desc-en').innerText  = descEn;
+        document.getElementById('rank-display').innerText    = '';
         document.getElementById('rank-display-en').innerText = '';
-        document.getElementById('action-btn').innerText     = 'CONTINUE';
-        document.getElementById('action-btn').onclick       = nextLevel;
+        document.getElementById('action-btn').innerText      = 'CONTINUE';
+        document.getElementById('action-btn').onclick        = () => {
+            if (popupLocked) return;
+            popupLocked = true;
+            nextLevel();
+        };
         over.style.display = 'flex';
     }
 
@@ -496,5 +550,3 @@
     </script>
 </body>
 </html>
-
-       
