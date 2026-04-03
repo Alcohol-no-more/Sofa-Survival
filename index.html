@@ -340,55 +340,58 @@
     }
 
     function loadQuestion() {
-        clearInterval(timerId);
+    clearInterval(timerId);
 
-        if (currentIdx >= sessionQuestions.length) return finishGame();
+    if (currentIdx >= sessionQuestions.length) return finishGame();
 
-        isLocked = false;
-        isUrgent = false;
+    isLocked = false;
+    isUrgent = false;
 
-        const scenario  = document.getElementById('scenario');
-        const timerBar  = document.getElementById('timer-bar');
-        const timerText = document.getElementById('timer-text');
+    const scenario  = document.getElementById('scenario');
+    const timerBar  = document.getElementById('timer-bar');
+    const timerText = document.getElementById('timer-text');
 
-        scenario.classList.remove('critical-shake');
+    scenario.classList.remove('critical-shake');
 
-        // ── 簡單重置，不動 transition ──
-        timerBar.classList.remove('urgent');
-        timerBar.style.width = '100%';
-        timerText.innerText  = TIMER_SECONDS + 's';
-        timerText.classList.remove('urgent');
+    // ── 修正：強制 Safari 渲染 100% ──
+    timerBar.style.transition = 'none';               // ← 新增
+    timerBar.classList.remove('urgent');
+    timerBar.style.width = '100%';
+    timerText.innerText  = TIMER_SECONDS + 's';
+    timerText.classList.remove('urgent');
 
-        const q = sessionQuestions[currentIdx];
+    void timerBar.offsetWidth;                         // ← 新增
+    timerBar.style.transition = 'width 0.1s linear';   // ← 新增
 
-        document.getElementById('scenario').innerHTML = q.s;
-        document.getElementById('scenario-en').innerHTML = q.se || '';
-        document.getElementById('step-num').innerText = currentIdx + 1;
+    const q = sessionQuestions[currentIdx];
 
-        const grid = document.getElementById('options');
-        grid.innerHTML = '';
+    document.getElementById('scenario').innerHTML = q.s;
+    document.getElementById('scenario-en').innerHTML = q.se || '';
+    document.getElementById('step-num').innerText = currentIdx + 1;
 
-        q.o.forEach((opt, i) => {
-            const btn = document.createElement('div');
-            btn.className = 'option-btn';
+    const grid = document.getElementById('options');
+    grid.innerHTML = '';
 
-            const en = (q.oe && q.oe[i]) ? q.oe[i] : '';
-            btn.innerHTML = en
-                ? `${opt}<span class="option-en">${en}</span>`
-                : opt;
+    q.o.forEach((opt, i) => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
 
-            btn.onclick = () => {
-                if (isLocked) return;
-                isLocked = true;
-                btn.blur();
-                selectAnswer(i, q.a, q.f, q.fe);
-            };
-            grid.appendChild(btn);
-        });
+        const en = (q.oe && q.oe[i]) ? q.oe[i] : '';
+        btn.innerHTML = en
+            ? `${opt}<span class="option-en">${en}</span>`
+            : opt;
 
-        // ── 直接啟動，不用 rAF ──
-        startTimer();
-    }
+        btn.onclick = () => {
+            if (isLocked) return;
+            isLocked = true;
+            btn.blur();
+            selectAnswer(i, q.a, q.f, q.fe);
+        };
+        grid.appendChild(btn);
+    });
+
+    startTimer();
+}
 
     function startTimer() {
         let remaining = TIMER_SECONDS * 1000;
