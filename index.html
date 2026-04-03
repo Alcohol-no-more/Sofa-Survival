@@ -93,7 +93,9 @@
             letter-spacing: 2px;
         }
 
-        .rage-bar-bg { height: 4px; background: rgba(255,255,255,0.1); margin: 20px 0; border-radius: 2px; }
+        .rage-bar-bg { height: 4px; background: rgba(255,255,255,0.1); margin: 20px 0; border-radius: 2px;
+                     flex-shrink: 0;
+                     }
 
         /* ── 修正：rage 為 0 時無光暈 ── */
         #rage-fill {
@@ -114,6 +116,7 @@
             height: 2px;
             background: #00f2ff;
             transition: width 0.1s linear;
+            flex-shrink: 0; 
         }
 
         /* ── 用 class 控制顏色（不用 JS inline style）── */
