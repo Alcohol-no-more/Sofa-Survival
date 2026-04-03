@@ -29,7 +29,6 @@
             align-items: center;
         }
 
-        /* ── 啟動首頁 ── */
         #start-screen {
             position: fixed;
             top: 0; left: 0;
@@ -48,8 +47,15 @@
             font-size: 1.8rem;
             letter-spacing: 8px;
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
             padding: 0 20px;
+        }
+
+        #start-subtitle {
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            opacity: 0.4;
+            margin-bottom: 40px;
         }
 
         .start-btn {
@@ -65,7 +71,6 @@
         }
         .start-btn:hover { background: #fff; color: #000; }
 
-        /* ── 遊戲主介面 ── */
         #app {
             display: none;
             width: 100%;
@@ -77,13 +82,48 @@
             z-index: 10;
         }
 
-        .rage-bar-bg { height: 4px; background: rgba(255,255,255,0.1); margin: 20px 0; border-radius: 2px; }
-        #rage-fill { height: 100%; width: 0%; background: var(--danger); box-shadow: 0 0 15px var(--danger); transition: width 0.4s; border-radius: 2px; }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .top-bar-info {
+            font-size: 10px;
+            opacity: 0.5;
+            letter-spacing: 2px;
+        }
 
-        /* ── 計時條 ── */
-        .timer-line { width: 100%; height: 2px; background: var(--accent); transition: width 0.1s linear; }
+        .rage-bar-bg { height: 4px; background: rgba(255,255,255,0.1); margin: 20px 0; border-radius: 2px;
+                     flex-shrink: 0;
+                     }
 
-        /* ── 倒數數字 ── */
+        /* ── 修正：rage 為 0 時無光暈 ── */
+        #rage-fill {
+            height: 100%;
+            width: 0%;
+            background: #ff0055;
+            box-shadow: none;
+            transition: width 0.4s, box-shadow 0.4s;
+            border-radius: 2px;
+        }
+        #rage-fill.has-rage {
+            box-shadow: 0 0 15px #ff0055;
+        }
+
+        /* ── 計時條：保持簡單，始終有 transition ── */
+        .timer-line {
+            width: 100%;
+            height: 2px;
+            background: #00f2ff;
+            transition: width 0.1s linear;
+            flex-shrink: 0; 
+        }
+
+        /* ── 用 class 控制顏色（不用 JS inline style）── */
+        .timer-line.urgent {
+            background: #ff0055;
+        }
+
         #timer-text {
             font-family: 'Syncopate', sans-serif;
             font-size: 12px;
@@ -91,27 +131,57 @@
             opacity: 0.5;
             margin-top: 8px;
             text-align: right;
+            transition: color 0.2s, opacity 0.2s;
         }
         #timer-text.urgent {
-            color: var(--danger);
+            color: #ff0055;
             opacity: 1;
         }
 
-        #scenario { font-size: 1.8rem; font-weight: 700; margin: 30px 0; min-height: 140px; line-height: 1.4; }
+        #scenario {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 30px 0 0 0;
+            min-height: 80px;
+            line-height: 1.4;
+        }
+        #scenario-en {
+            font-size: 0.95rem;
+            font-weight: 300;
+            opacity: 0.4;
+            margin: 8px 0 30px 0;
+            line-height: 1.5;
+        }
+
         .options-grid { display: grid; gap: 12px; margin-top: auto; padding-bottom: 20px; }
 
         .option-btn {
             background: var(--glass);
             border: 1px solid rgba(255,255,255,0.1) !important;
-            padding: 20px; border-radius: 12px; font-size: 16px; color: #fff;
-            cursor: pointer; text-align: left;
+            padding: 18px 20px;
+            border-radius: 12px;
+            font-size: 16px;
+            color: #fff;
+            cursor: pointer;
+            text-align: left;
             outline: none !important;
             -webkit-tap-highlight-color: transparent;
             transition: transform 0.1s;
         }
-        .option-btn:active { background: rgba(255,255,255,0.1); border-color: var(--accent) !important; transform: scale(0.97); }
+        .option-btn:active {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--accent) !important;
+            transform: scale(0.97);
+        }
 
-        /* ── 結果與結算畫面 ── */
+        .option-en {
+            display: block;
+            font-size: 0.8em;
+            opacity: 0.35;
+            margin-top: 4px;
+            font-weight: 300;
+        }
+
         .overlay {
             position: fixed;
             top: 0; left: 0;
@@ -134,8 +204,40 @@
             align-items: center;
         }
 
-        /* ── 動效 ── */
-        .critical-shake { animation: shake 0.2s infinite; color: var(--danger); }
+        #status-title {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            font-family: 'Syncopate';
+        }
+        #status-desc {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        #status-desc-en {
+            font-size: 0.85rem;
+            opacity: 0.35;
+            margin-bottom: 35px;
+            line-height: 1.5;
+            font-weight: 300;
+        }
+        #rank-display {
+            font-size: 1.6rem;
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        #rank-display-en {
+            font-size: 0.85rem;
+            color: var(--accent);
+            opacity: 0.5;
+            margin-bottom: 45px;
+            font-weight: 300;
+        }
+
+        .critical-shake { animation: shake 0.2s infinite; color: #ff0055; }
         @keyframes shake { 0%{transform:translate(1px,1px)} 50%{transform:translate(-1px,-2px)} 100%{transform:translate(1px,1px)} }
     </style>
 </head>
@@ -143,24 +245,30 @@
 
     <div id="start-screen">
         <h1 id="glitch-title">今晚唔想瞓梳化</h1>
+        <p id="start-subtitle">SOFA SURVIVAL</p>
         <button class="start-btn" onclick="initiateGame()">START MISSION</button>
     </div>
 
     <div id="app">
-        <div style="font-size: 10px; opacity: 0.5; letter-spacing: 2px;">SURVIVAL STAGE <span id="step-num">1</span>/10</div>
+        <div class="top-bar">
+            <div class="top-bar-info">SURVIVAL STAGE <span id="step-num">1</span>/10</div>
+        </div>
         <div class="rage-bar-bg"><div id="rage-fill"></div></div>
         <div class="timer-line" id="timer-bar"></div>
         <div id="timer-text">15s</div>
 
         <h1 id="scenario">...</h1>
+        <p id="scenario-en"></p>
         <div class="options-grid" id="options"></div>
     </div>
 
     <div id="overlay" class="overlay">
         <div class="overlay-inner">
-            <h2 id="status-title" style="font-size: 2.5rem; margin-bottom: 15px; font-family: 'Syncopate';">STATUS</h2>
-            <p id="status-desc" style="font-size: 1.1rem; opacity: 0.8; margin-bottom: 35px; line-height: 1.6;"></p>
-            <div id="rank-display" style="font-size: 1.6rem; color: var(--accent); margin-bottom: 45px; font-weight: bold; letter-spacing: 2px;"></div>
+            <h2 id="status-title">STATUS</h2>
+            <p id="status-desc"></p>
+            <p id="status-desc-en"></p>
+            <div id="rank-display"></div>
+            <div id="rank-display-en"></div>
             <button id="action-btn" class="start-btn">CONTINUE</button>
         </div>
     </div>
@@ -168,9 +276,6 @@
     <script src="questions.js"></script>
     <script>
 
-    // ═══════════════════════════════════════════════════════
-    // 標題 Glitch 動效
-    // ═══════════════════════════════════════════════════════
     const titleText = "今晚唔想瞓梳化";
     const glitchTitle = document.getElementById('glitch-title');
 
@@ -188,9 +293,6 @@
     }
     window.onload = scrambleTitle;
 
-    // ═══════════════════════════════════════════════════════
-    // Fisher-Yates 洗牌
-    // ═══════════════════════════════════════════════════════
     function fisherYatesShuffle(array) {
         const arr = [...array];
         for (let i = arr.length - 1; i > 0; i--) {
@@ -200,24 +302,20 @@
         return arr;
     }
 
-    // ═══════════════════════════════════════════════════════
-    // 全域狀態
-    // ═══════════════════════════════════════════════════════
     const TIMER_SECONDS = 15;
     const TICK_MS       = 100;
     const TOTAL_ROUNDS  = 10;
-    const URGENT_AT     = 5;       // 剩幾秒開始警告
+    const URGENT_AT     = 5;
 
     let currentIdx       = 0;
     let rage             = 0;
     let score            = 0;
     let timerId          = null;
     let isLocked         = false;
+    let isUrgent         = false;
+    let popupLocked      = false;
     let sessionQuestions = [];
 
-    // ═══════════════════════════════════════════════════════
-    // 開始遊戲
-    // ═══════════════════════════════════════════════════════
     function initiateGame() {
         if (typeof allQuestions === 'undefined' || allQuestions.length === 0) {
             alert('題庫載入失敗，請確認 questions.js');
@@ -231,7 +329,10 @@
         rage       = 0;
         score      = 0;
 
-        document.getElementById('rage-fill').style.width = '0%';
+        const rageFill = document.getElementById('rage-fill');
+        rageFill.style.width = '0%';
+        rageFill.classList.remove('has-rage');
+
         document.getElementById('start-screen').style.opacity = '0';
 
         setTimeout(() => {
@@ -241,41 +342,60 @@
         }, 800);
     }
 
-    // ═══════════════════════════════════════════════════════
-    // 載入題目
-    // ═══════════════════════════════════════════════════════
     function loadQuestion() {
-        if (currentIdx >= sessionQuestions.length) return finishGame();
+    clearInterval(timerId);
 
-        isLocked = false;
-        document.getElementById('scenario').classList.remove('critical-shake');
+    if (currentIdx >= sessionQuestions.length) return finishGame();
 
-        const q = sessionQuestions[currentIdx];
-        document.getElementById('scenario').innerHTML = q.s;
-        document.getElementById('step-num').innerText = currentIdx + 1;
+    isLocked = false;
+    isUrgent = false;
 
-        const grid = document.getElementById('options');
-        grid.innerHTML = '';
+    const scenario  = document.getElementById('scenario');
+    const timerBar  = document.getElementById('timer-bar');
+    const timerText = document.getElementById('timer-text');
 
-        q.o.forEach((opt, i) => {
-            const btn = document.createElement('div');
-            btn.className = 'option-btn';
-            btn.innerText = opt;
-            btn.onclick = () => {
-                if (isLocked) return;
-                isLocked = true;
-                btn.blur();
-                selectAnswer(i, q.a, q.f);
-            };
-            grid.appendChild(btn);
-        });
+    scenario.classList.remove('critical-shake');
 
-        startTimer();
-    }
+    // ── 修正：強制 Safari 渲染 100% ──
+    timerBar.style.transition = 'none';               // ← 新增
+    timerBar.classList.remove('urgent');
+    timerBar.style.width = '100%';
+    timerText.innerText  = TIMER_SECONDS + 's';
+    timerText.classList.remove('urgent');
 
-    // ═══════════════════════════════════════════════════════
-    // 15 秒計時器
-    // ═══════════════════════════════════════════════════════
+    void timerBar.offsetWidth;                         // ← 新增
+    timerBar.style.transition = 'width 0.1s linear';   // ← 新增
+
+    const q = sessionQuestions[currentIdx];
+
+    document.getElementById('scenario').innerHTML = q.s;
+    document.getElementById('scenario-en').innerHTML = q.se || '';
+    document.getElementById('step-num').innerText = currentIdx + 1;
+
+    const grid = document.getElementById('options');
+    grid.innerHTML = '';
+
+    q.o.forEach((opt, i) => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+
+        const en = (q.oe && q.oe[i]) ? q.oe[i] : '';
+        btn.innerHTML = en
+            ? `${opt}<span class="option-en">${en}</span>`
+            : opt;
+
+        btn.onclick = () => {
+            if (isLocked) return;
+            isLocked = true;
+            btn.blur();
+            selectAnswer(i, q.a, q.f, q.fe);
+        };
+        grid.appendChild(btn);
+    });
+
+    startTimer();
+}
+
     function startTimer() {
         let remaining = TIMER_SECONDS * 1000;
         const totalMs = TIMER_SECONDS * 1000;
@@ -283,105 +403,120 @@
         const timerText = document.getElementById('timer-text');
         const scenario  = document.getElementById('scenario');
 
-        // 重置顯示
-        timerBar.style.width = '100%';
-        timerText.innerText  = TIMER_SECONDS + 's';
-        timerText.classList.remove('urgent');
-        timerBar.style.background = 'var(--accent)';
-
-        clearInterval(timerId);
-
         timerId = setInterval(() => {
             remaining -= TICK_MS;
             if (remaining < 0) remaining = 0;
 
-            // 更新進度條
             const pct = (remaining / totalMs) * 100;
             timerBar.style.width = pct + '%';
 
-            // 更新秒數文字
             const secs = Math.ceil(remaining / 1000);
             timerText.innerText = secs + 's';
 
-            // 緊急狀態
-            if (secs <= URGENT_AT) {
+            // ── 單向切換 urgent（不閃爍）──
+            if (!isUrgent && remaining <= URGENT_AT * 1000) {
+                isUrgent = true;
                 timerText.classList.add('urgent');
-                timerBar.style.background = 'var(--danger)';
+                timerBar.classList.add('urgent');
                 scenario.classList.add('critical-shake');
-            } else {
-                timerText.classList.remove('urgent');
-                timerBar.style.background = 'var(--accent)';
-                scenario.classList.remove('critical-shake');
             }
 
-            // 時間到
             if (remaining <= 0) {
                 clearInterval(timerId);
                 isLocked = true;
-                handleFail("諗咁耐？你一定係喺度編緊大話！");
+                handleFail(
+                    "諗咁耐？你一定係喺度編緊大話！",
+                    "Took too long? You must be making up a lie!"
+                );
             }
         }, TICK_MS);
     }
 
-    // ═══════════════════════════════════════════════════════
-    // 答題邏輯
-    // ═══════════════════════════════════════════════════════
-    function selectAnswer(idx, correct, failMsg) {
+    function selectAnswer(idx, correct, failMsg, failMsgEn) {
         clearInterval(timerId);
         if (idx === correct) {
             score++;
-            showPopup("SURVIVED", "算你識答，暫時安全。", false);
+            showPopup(
+                "SURVIVED",
+                "算你識答，暫時安全。",
+                "Good answer. You're safe... for now.",
+                false
+            );
         } else {
-            handleFail(failMsg);
+            handleFail(failMsg, failMsgEn || '');
         }
     }
 
-    function handleFail(msg) {
+    function handleFail(msg, msgEn) {
+        clearInterval(timerId);
         rage = Math.min(rage + 10, 100);
-        document.getElementById('rage-fill').style.width = rage + "%";
-        showPopup("DANGER", msg, true);
+
+        const rageFill = document.getElementById('rage-fill');
+        rageFill.style.width = rage + "%";
+        if (rage > 0) rageFill.classList.add('has-rage');
+
+        showPopup("DANGER", msg, msgEn || '', true);
     }
 
-    // ═══════════════════════════════════════════════════════
-    // 彈窗
-    // ═══════════════════════════════════════════════════════
-    function showPopup(title, desc, isFail) {
-        const over    = document.getElementById('overlay');
-        const titleEl = document.getElementById('status-title');
+    function showPopup(title, desc, descEn, isFail) {
+        popupLocked = false;
+        const over = document.getElementById('overlay');
 
-        titleEl.innerText  = title;
-        titleEl.style.color = isFail ? '#ff0055' : '#00f2ff';
-        document.getElementById('status-desc').innerText  = desc;
-        document.getElementById('rank-display').innerText = '';
-        document.getElementById('action-btn').innerText   = 'CONTINUE';
-        document.getElementById('action-btn').onclick     = nextLevel;
+        document.getElementById('status-title').innerText    = title;
+        document.getElementById('status-title').style.color  = isFail ? '#ff0055' : '#00f2ff';
+        document.getElementById('status-desc').innerText     = desc;
+        document.getElementById('status-desc-en').innerText  = descEn;
+        document.getElementById('rank-display').innerText    = '';
+        document.getElementById('rank-display-en').innerText = '';
+        document.getElementById('action-btn').innerText      = 'CONTINUE';
+        document.getElementById('action-btn').onclick        = () => {
+            if (popupLocked) return;
+            popupLocked = true;
+            nextLevel();
+        };
         over.style.display = 'flex';
     }
 
     function nextLevel() {
-        document.getElementById('overlay').style.display = 'none';
-        currentIdx++;
+    document.getElementById('overlay').style.display = 'none';
+    currentIdx++;
+    // 讓 Safari 先完成 overlay 隱藏的渲染，再載入下一題
+    requestAnimationFrame(() => {
         loadQuestion();
-    }
+    });
+}
 
-    // ═══════════════════════════════════════════════════════
-    // 結算
-    // ═══════════════════════════════════════════════════════
     function finishGame() {
         clearInterval(timerId);
 
-        const pct  = Math.round((score / sessionQuestions.length) * 100);
-        const rank = score >= 9  ? "【求生大師】你女朋友對你非常滿意"
-                   : score >= 6  ? "【資深男友】基本上可以安睡在床上"
-                                 : "【梳化常駐嘉賓】今晚注定瞓梳化";
+        const pct = Math.round((score / sessionQuestions.length) * 100);
 
-        document.getElementById('status-title').innerText     = "MISSION END";
-        document.getElementById('status-title').style.color   = '#fff';
-        document.getElementById('status-desc').innerText      = "本次求生成功率：" + pct + "%";
-        document.getElementById('rank-display').innerText     = rank;
-        document.getElementById('action-btn').innerText       = "ONE MORE TRY";
-        document.getElementById('action-btn').onclick         = () => location.reload();
-        document.getElementById('overlay').style.display      = 'flex';
+        let rankZh, rankEn;
+        if (score >= 9) {
+            rankZh = "【求生大師】你女朋友對你非常滿意";
+            rankEn = "【Survival Master】Your girlfriend is very pleased.";
+        } else if (score >= 6) {
+    rankZh = "【資深男友】基本上可以安睡在床上";
+    rankEn = "【Veteran Boyfriend】You can probably sleep on the bed tonight.";
+} else if (score >= 1) {
+    // 1-5 分
+    rankZh = "【梳化常駐嘉賓】今晚注定瞓梳化";
+    rankEn = "【Sofa Resident】The couch is your bed tonight.";
+} else {
+    // 0 分
+    rankZh = "【你同張梳化結婚啦】月老都幫你唔到";
+    rankEn = "【Marry the Sofa Instead】Even Cupid gave up on you.";
+}
+
+        document.getElementById('status-title').innerText    = "MISSION END";
+        document.getElementById('status-title').style.color  = '#fff';
+        document.getElementById('status-desc').innerText     = "本次求生成功率：" + pct + "%";
+        document.getElementById('status-desc-en').innerText  = "Survival rate: " + pct + "%";
+        document.getElementById('rank-display').innerText    = rankZh;
+        document.getElementById('rank-display-en').innerText = rankEn;
+        document.getElementById('action-btn').innerText      = "ONE MORE TRY";
+        document.getElementById('action-btn').onclick        = () => location.reload();
+        document.getElementById('overlay').style.display     = 'flex';
     }
 
     </script>
