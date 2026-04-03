@@ -475,10 +475,13 @@
     }
 
     function nextLevel() {
-        document.getElementById('overlay').style.display = 'none';
-        currentIdx++;
+    document.getElementById('overlay').style.display = 'none';
+    currentIdx++;
+    // 讓 Safari 先完成 overlay 隱藏的渲染，再載入下一題
+    requestAnimationFrame(() => {
         loadQuestion();
-    }
+    });
+}
 
     function finishGame() {
         clearInterval(timerId);
