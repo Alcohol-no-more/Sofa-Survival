@@ -29,7 +29,6 @@
             align-items: center;
         }
 
-        /* ── 啟動首頁 ── */
         #start-screen {
             position: fixed;
             top: 0; left: 0;
@@ -72,7 +71,6 @@
         }
         .start-btn:hover { background: #fff; color: #000; }
 
-        /* ── 遊戲主介面 ── */
         #app {
             display: none;
             width: 100%;
@@ -97,7 +95,7 @@
 
         .rage-bar-bg { height: 4px; background: rgba(255,255,255,0.1); margin: 20px 0; border-radius: 2px; }
 
-        /* ── 修正4：預設無光暈，有怒氣時才加 ── */
+        /* ── 修正：rage 為 0 時無光暈 ── */
         #rage-fill {
             height: 100%;
             width: 0%;
@@ -110,22 +108,19 @@
             box-shadow: 0 0 15px #ff0055;
         }
 
-        /* ── 計時條 ── */
-        /* 修正1+5：顏色用 class 控制，預設無 transition ── */
+        /* ── 計時條：保持簡單，始終有 transition ── */
         .timer-line {
             width: 100%;
             height: 2px;
             background: #00f2ff;
-            transition: none;
-        }
-        .timer-line.animating {
             transition: width 0.1s linear;
         }
+
+        /* ── 用 class 控制顏色（不用 JS inline style）── */
         .timer-line.urgent {
-            background: #ff0055 !important;
+            background: #ff0055;
         }
 
-        /* ── 倒數數字 ── */
         #timer-text {
             font-family: 'Syncopate', sans-serif;
             font-size: 12px;
@@ -140,7 +135,6 @@
             opacity: 1;
         }
 
-        /* ── 題目區 ── */
         #scenario {
             font-size: 1.3rem;
             font-weight: 700;
@@ -185,7 +179,6 @@
             font-weight: 300;
         }
 
-        /* ── 結果與結算畫面 ── */
         .overlay {
             position: fixed;
             top: 0; left: 0;
@@ -241,7 +234,6 @@
             font-weight: 300;
         }
 
-        /* ── 動效 ── */
         .critical-shake { animation: shake 0.2s infinite; color: #ff0055; }
         @keyframes shake { 0%{transform:translate(1px,1px)} 50%{transform:translate(-1px,-2px)} 100%{transform:translate(1px,1px)} }
     </style>
@@ -281,9 +273,6 @@
     <script src="questions.js"></script>
     <script>
 
-    // ═══════════════════════════════════════════════════════
-    // 標題 Glitch 動效
-    // ═══════════════════════════════════════════════════════
     const titleText = "今晚唔想瞓梳化";
     const glitchTitle = document.getElementById('glitch-title');
 
@@ -301,9 +290,6 @@
     }
     window.onload = scrambleTitle;
 
-    // ═══════════════════════════════════════════════════════
-    // Fisher-Yates 洗牌
-    // ═══════════════════════════════════════════════════════
     function fisherYatesShuffle(array) {
         const arr = [...array];
         for (let i = arr.length - 1; i > 0; i--) {
@@ -313,9 +299,6 @@
         return arr;
     }
 
-    // ═══════════════════════════════════════════════════════
-    // 全域狀態
-    // ═══════════════════════════════════════════════════════
     const TIMER_SECONDS = 15;
     const TICK_MS       = 100;
     const TOTAL_ROUNDS  = 10;
@@ -326,13 +309,10 @@
     let score            = 0;
     let timerId          = null;
     let isLocked         = false;
-    let isUrgent         = false;   // 修正2：追蹤 urgent 狀態
-    let popupLocked      = false;   // 修正6：防重複點擊
+    let isUrgent         = false;
+    let popupLocked      = false;
     let sessionQuestions = [];
 
-    // ═══════════════════════════════════════════════════════
-    // 開始遊戲
-    // ═══════════════════════════════════════════════════════
     function initiateGame() {
         if (typeof allQuestions === 'undefined' || allQuestions.length === 0) {
             alert('題庫載入失敗，請確認 questions.js');
@@ -359,17 +339,13 @@
         }, 800);
     }
 
-    // ═══════════════════════════════════════════════════════
-    // 載入題目
-    // ═══════════════════════════════════════════════════════
     function loadQuestion() {
-        // 修正7：一開始就清除可能殘留的定時器
         clearInterval(timerId);
 
         if (currentIdx >= sessionQuestions.length) return finishGame();
 
         isLocked = false;
-        isUrgent = false;   // 修正2：每題重置
+        isUrgent = false;
 
         const scenario  = document.getElementById('scenario');
         const timerBar  = document.getElementById('timer-bar');
@@ -377,8 +353,8 @@
 
         scenario.classList.remove('critical-shake');
 
-        // 修正5：關閉過渡 → 瞬間重置到 100% → 下一幀再開啟過渡
-        timerBar.classList.remove('animating', 'urgent');
+        // ── 簡單重置，不動 transition ──
+        timerBar.classList.remove('urgent');
         timerBar.style.width = '100%';
         timerText.innerText  = TIMER_SECONDS + 's';
         timerText.classList.remove('urgent');
@@ -410,13 +386,10 @@
             grid.appendChild(btn);
         });
 
-        // 修正5：用雙層 rAF 確保瀏覽器已渲染 100% 再開始動畫
-        void timerBar.offsetWidth;          // 強制回流，Safari 立即渲染
-timerBar.classList.add('animating'); // 安全加回 transition
-startTimer();                       // 直接啟動
-    // ═══════════════════════════════════════════════════════
-    // 15 秒計時器（修正版）
-    // ═══════════════════════════════════════════════════════
+        // ── 直接啟動，不用 rAF ──
+        startTimer();
+    }
+
     function startTimer() {
         let remaining = TIMER_SECONDS * 1000;
         const totalMs = TIMER_SECONDS * 1000;
@@ -434,7 +407,7 @@ startTimer();                       // 直接啟動
             const secs = Math.ceil(remaining / 1000);
             timerText.innerText = secs + 's';
 
-            // 修正2：用毫秒判斷 + 單向切換，永不退出 urgent
+            // ── 單向切換 urgent（不閃爍）──
             if (!isUrgent && remaining <= URGENT_AT * 1000) {
                 isUrgent = true;
                 timerText.classList.add('urgent');
@@ -453,9 +426,6 @@ startTimer();                       // 直接啟動
         }, TICK_MS);
     }
 
-    // ═══════════════════════════════════════════════════════
-    // 答題邏輯
-    // ═══════════════════════════════════════════════════════
     function selectAnswer(idx, correct, failMsg, failMsgEn) {
         clearInterval(timerId);
         if (idx === correct) {
@@ -471,7 +441,6 @@ startTimer();                       // 直接啟動
         }
     }
 
-    // 修正8：統一在 handleFail 中也清除定時器
     function handleFail(msg, msgEn) {
         clearInterval(timerId);
         rage = Math.min(rage + 10, 100);
@@ -483,9 +452,6 @@ startTimer();                       // 直接啟動
         showPopup("DANGER", msg, msgEn || '', true);
     }
 
-    // ═══════════════════════════════════════════════════════
-    // 彈窗（修正6：防重複點擊）
-    // ═══════════════════════════════════════════════════════
     function showPopup(title, desc, descEn, isFail) {
         popupLocked = false;
         const over = document.getElementById('overlay');
@@ -511,9 +477,6 @@ startTimer();                       // 直接啟動
         loadQuestion();
     }
 
-    // ═══════════════════════════════════════════════════════
-    // 結算（雙語）
-    // ═══════════════════════════════════════════════════════
     function finishGame() {
         clearInterval(timerId);
 
