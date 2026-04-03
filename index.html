@@ -496,12 +496,17 @@
             rankZh = "【求生大師】你女朋友對你非常滿意";
             rankEn = "【Survival Master】Your girlfriend is very pleased.";
         } else if (score >= 6) {
-            rankZh = "【資深男友】基本上可以安睡在床上";
-            rankEn = "【Veteran Boyfriend】You can probably sleep on the bed tonight.";
-        } else {
-            rankZh = "【梳化常駐嘉賓】今晚注定瞓梳化";
-            rankEn = "【Sofa Resident】The couch is your bed tonight.";
-        }
+    rankZh = "【資深男友】基本上可以安睡在床上";
+    rankEn = "【Veteran Boyfriend】You can probably sleep on the bed tonight.";
+} else if (score >= 1) {
+    // 1-5 分
+    rankZh = "【梳化常駐嘉賓】今晚注定瞓梳化";
+    rankEn = "【Sofa Resident】The couch is your bed tonight.";
+} else {
+    // 0 分
+    rankZh = "【你同張梳化結婚啦】月老都幫你唔到";
+    rankEn = "【Marry the Sofa Instead】Even Cupid gave up on you.";
+}
 
         document.getElementById('status-title').innerText    = "MISSION END";
         document.getElementById('status-title').style.color  = '#fff';
